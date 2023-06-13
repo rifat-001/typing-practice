@@ -129,7 +129,7 @@ class Typing {
 		this.textPos++;
 
 		if (this.textPos == this.text.length) {
-			this.textListIdx++;
+			this.textListIdx = (this.textListIdx + 1) % this.textList.length;
 			clearInterval(this.ineterval);
 			this.init();
 		} else {
