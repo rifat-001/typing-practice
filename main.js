@@ -1,11 +1,21 @@
 const textElem = document.querySelector('.text');
 const speed = document.querySelector('.speed');
 
+import Keyboard from './keyboard.js';
+
 async function getRandomText(url) {
-	const response = await fetch('https://type.fit/api/quotes', {});
-	var data = await response.json();
-	// return data[0]['q'];
-	return data;
+	try {
+		const response = await fetch('https://type.fit/api/quotes', {});
+		var data = await response.json();
+		// return data[0]['q'];
+		return data;
+	} catch {
+		return [
+			{
+				text: 'Hello world',
+			},
+		];
+	}
 }
 
 class Typing {
@@ -58,17 +68,6 @@ class Typing {
 		speed.innerText = Math.round(wpm);
 	}
 
-	// getWPMCalculator(delta) {
-	// 	let timer = new Date().getTime();
-	// 	let context = this;
-	// 	return function () {
-	// 		//console.log(new Date().getTime() - timer, delta);
-	// 		if (new Date().getTime() - timer >= delta) {
-	// 			context.calculateWPM();
-	// 			timer = new Date().getTime();
-	// 		}
-	// 	};
-	// }
 	generateFormatedText() {
 		let formatedText = '';
 		let block = '';
@@ -141,18 +140,28 @@ class Typing {
 		textElem.innerHTML = this.formatedText;
 	}
 
-	keyPressHandler(e) {
-		this.generalKeyHandler(e.key);
-
+	simulateKeyPress(_key) {
+		if (_key == 'Backspace') {
+			this.backSpaceHandler({ keyCode: 8 });
+			return;
+		}
+		// console.log(_key);
+		this.generalKeyHandler(_key);
 		this.generateFormatedText();
 		this.updateUI();
+	}
+	keyPressHandler(e) {
+		this.simulateKeyPress(e.key);
 	}
 }
 
 async function init() {
+	//console.log(await getRandomText());
 	const typingInstance = new Typing(await getRandomText());
-	const hiddenInput = document.querySelector('input.hidden');
-
+	const keyboard = new Keyboard(
+		typingInstance.simulateKeyPress.bind(typingInstance)
+	);
+	keyboard.showKeyBoard();
 	document.addEventListener(
 		'keydown',
 		typingInstance.backSpaceHandler.bind(typingInstance)
@@ -163,8 +172,13 @@ async function init() {
 		typingInstance.keyPressHandler.bind(typingInstance)
 	);
 
-	document.addEventListener('click', () => {
-		hiddenInput.focus();
+	document.addEventListener('keydown', (e) => {
+		keyboard.pressKey(e.key, e);
+		if (e.key == 'Tab' || e.key == 'Alt') e.preventDefault();
+	});
+
+	document.addEventListener('keyup', (e) => {
+		keyboard.unPressKey(e.key, e);
 	});
 }
 

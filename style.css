@@ -83,3 +83,51 @@ h1{
 /* input.hidden{
     display: none;
 } */
+
+
+/* ============================= */
+/* ================keyboard ============= */
+
+.keyboard-container{
+    display: flex;
+    flex-direction: column;
+    gap : 8px;
+}
+
+.keyboard-row{
+    display: flex;
+    gap : 8px;
+    flex-wrap: nowrap;
+}
+
+.key{
+    padding : 8px 0; 
+    flex-grow: 1;
+    font-size: 20px;
+    border : 1px solid #ddd;
+    border-bottom : 2px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #fff;
+    user-select: none;
+}
+
+.key[data-label='Space']{
+    flex-grow : 6;
+}
+
+.pressed{
+    background : cyan;
+  color : #333;
+  font-weight: bold;
+    transition: .1s;
+}
+
+.key[data-label='Enter'], .key[data-label='Shift']{
+    flex-grow : 2;
+}
+
+
+.key:focus{
+    background : #ddd;
+}
