@@ -151,6 +151,7 @@ class Typing {
 
 async function init() {
 	const typingInstance = new Typing(await getRandomText());
+	const hiddenInput = document.querySelector('input.hidden');
 
 	document.addEventListener(
 		'keydown',
@@ -161,6 +162,10 @@ async function init() {
 		'keypress',
 		typingInstance.keyPressHandler.bind(typingInstance)
 	);
+
+	document.addEventListener('click', () => {
+		hiddenInput.focus();
+	});
 }
 
 init();
