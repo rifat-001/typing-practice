@@ -391,15 +391,22 @@ const reverseShiftKeyBoardData = {
 };
 
 export default class Keyboard {
-	constructor(_keyPressHandler) {
+	constructor() {
 		this.prevKey = undefined;
 		this.defaultState = true;
-		this.keyPressHandler = _keyPressHandler;
+
 		this.keyboardElem = document.querySelector('.keyboard');
 		this.keyboardElem.addEventListener(
 			'mousedown',
 			this.mouseDownHandler.bind(this)
 		);
+		this.keyboardElem.addEventListener(
+			'mouseup',
+			this.mouseUpHandler.bind(this)
+		);
+
+		this.mouseDownInterval;
+		this.mosueDownTimeout;
 	}
 	buildKeyboard(_data) {
 		const keyboardContainer = buildElem('div', ['keyboard-container']);
@@ -427,31 +434,83 @@ export default class Keyboard {
 		this.keyboardElem.appendChild(keyboardContainer);
 	}
 
-	mouseDownHandler(e) {
-		if (e.target.classList.contains('key')) {
-			e.target.classList.add('pressed');
-			e.preventDefault();
-			let timeOut = setTimeout(() => {
-				e.target.classList.remove('pressed');
-			}, 150);
+	getKeyLabel(_key) {
+		let key = _key;
+		switch (key) {
+			case 'Caps Lock':
+				key = 'CapsLock';
+				break;
+			case 'Win':
+				key = 'Meta';
+				break;
+		}
 
-			const label = e.target.dataset.label;
-			const event = {
-				location: e.target.getAttribute('location'),
-			};
-			console.log(e.target);
-			switch (label) {
-				case 'Shift':
-					this.handleShiftPress(label, event);
-					setTimeout(this.handleShiftRelease.bind(this), 500);
-					break;
-				case 'Caps Lock':
-					clearTimeout(timeOut);
-					this.handleCapsLock(label, event);
-					break;
-				default:
-					this.keyPressHandler(e.target.dataset.label);
+		return key;
+	}
+
+	mouseDownFunctionality(e) {
+		if (e.target.classList.contains('key')) {
+			let keyLabel = this.getKeyLabel(e.target.dataset.label);
+			const location = e.target.getAttribute('location');
+
+			if (
+				keyLabel == 'Shift' ||
+				keyLabel == 'CapsLock' ||
+				keyLabel == 'Backspace' ||
+				keyLabel == 'Alt' ||
+				keyLabel == 'Tab' ||
+				keyLabel == 'Ctrl'
+			) {
+				document.dispatchEvent(
+					new KeyboardEvent('keydown', {
+						key: keyLabel,
+						location: location && (location == 'left' ? 1 : 2),
+					})
+				);
+			} else {
+				document.dispatchEvent(
+					new KeyboardEvent('keypress', {
+						key: keyLabel,
+						location: location && (location == 'left' ? 1 : 2),
+					})
+				);
 			}
+
+			e.target.classList.add('pressed');
+		}
+	}
+
+	mouseDownHandler(e) {
+		//initial click
+		this.mouseDownFunctionality(e);
+
+		// manage while do not release mouse
+		this.mosueDownTimeout = setTimeout(
+			(() => {
+				this.mouseDownInterval = setInterval(
+					this.mouseDownFunctionality.bind(this, e),
+					40
+				);
+			}).bind(this),
+			500
+		);
+	}
+
+	mouseUpHandler(e) {
+		clearInterval(this.mouseDownInterval);
+		clearTimeout(this.mosueDownTimeout);
+		if (e.target.classList.contains('key')) {
+			let keyLabel = this.getKeyLabel(e.target.dataset.label);
+			if (keyLabel == 'CapsLock') return;
+			const location = e.target.getAttribute('location');
+
+			document.dispatchEvent(
+				new KeyboardEvent('keyup', {
+					key: keyLabel,
+					location: location && (location == 'left' ? 1 : 2),
+				})
+			);
+			e.target.classList.remove('pressed');
 		}
 	}
 
@@ -464,7 +523,6 @@ export default class Keyboard {
 	}
 
 	getKeyElem(_key, e) {
-		console.log(_key);
 		let keyLabel = _key;
 		switch (keyLabel) {
 			case ' ':
@@ -492,7 +550,6 @@ export default class Keyboard {
 			elem = document.querySelector(`.key[data-label = "\\${keyLabel}"]`);
 			return elem;
 		}
-		console.log(_key);
 		elem = document.querySelector(`.key[data-label = "${keyLabel}"]`);
 		return elem;
 	}
@@ -554,7 +611,6 @@ export default class Keyboard {
 		}
 
 		const elem = this.getKeyElem(_key, e);
-		console.log(elem);
 		if (!elem) return;
 		elem.classList.add('pressed');
 		this.prevKey = _key;

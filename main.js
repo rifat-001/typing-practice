@@ -92,7 +92,7 @@ class Typing {
 	}
 
 	backSpaceHandler(e) {
-		if (e.keyCode != 8) return;
+		if (e.keyCode != 8 && e.key != 'Backspace') return;
 
 		if (this.textPos == 0) return;
 		this.keyData[this.textPos].status = 0;
@@ -140,27 +140,22 @@ class Typing {
 		textElem.innerHTML = this.formatedText;
 	}
 
-	simulateKeyPress(_key) {
-		if (_key == 'Backspace') {
-			this.backSpaceHandler({ keyCode: 8 });
+	keyPressHandler(e) {
+		if (e.key == 'Backspace') {
+			this.backSpaceHandler(e);
 			return;
 		}
 		// console.log(_key);
-		this.generalKeyHandler(_key);
+		this.generalKeyHandler(e.key);
 		this.generateFormatedText();
 		this.updateUI();
-	}
-	keyPressHandler(e) {
-		this.simulateKeyPress(e.key);
 	}
 }
 
 async function init() {
 	//console.log(await getRandomText());
 	const typingInstance = new Typing(await getRandomText());
-	const keyboard = new Keyboard(
-		typingInstance.simulateKeyPress.bind(typingInstance)
-	);
+	const keyboard = new Keyboard();
 	keyboard.showKeyBoard();
 	document.addEventListener(
 		'keydown',
@@ -172,6 +167,7 @@ async function init() {
 		typingInstance.keyPressHandler.bind(typingInstance)
 	);
 
+	//updating keyboard layout
 	document.addEventListener('keydown', (e) => {
 		keyboard.pressKey(e.key, e);
 		if (e.key == 'Tab' || e.key == 'Alt') e.preventDefault();
