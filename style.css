@@ -3,7 +3,9 @@
     margin : 0;
     padding : 0;
 }
-
+body{
+    font-family : 'Poppins', sans-serif;
+}
 
 .container{
     max-width: 1148px;
@@ -19,7 +21,7 @@ h1{
 .text{
     font-size : 32px;
     color : #c2b9b9;
-    font-family: sans-serif;
+    font-family: 'Poppins', sans-serif;
     padding : 20px;
     border : 1px solid #888;
     line-height: 1.5;
@@ -117,9 +119,9 @@ h1{
 }
 
 .pressed{
-    background : cyan;
-  color : #333;
-  font-weight: bold;
+    background :#090580 ;
+  color : #fff;
+  font-weight: 500;
     transition: .1s;
 }
 

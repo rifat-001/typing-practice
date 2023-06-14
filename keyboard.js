@@ -461,6 +461,11 @@ export default class Keyboard {
 				keyLabel == 'Tab' ||
 				keyLabel == 'Ctrl'
 			) {
+				// disable capslock
+				if (keyLabel == 'CapsLock') {
+					// e.target.classList.add('disabled');
+					return;
+				}
 				document.dispatchEvent(
 					new KeyboardEvent('keydown', {
 						key: keyLabel,
